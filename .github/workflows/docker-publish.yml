@@ -53,9 +53,9 @@ jobs:
           docker buildx inspect --bootstrap
 
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/username/repo:${{ env.TAG }}
+            ghcr.io/${{ github.repository_owner | toLower }}/${{ github.event.repository.name | toLower }}:${{ env.TAG }}
