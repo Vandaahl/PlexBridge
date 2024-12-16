@@ -1,0 +1,4 @@
+secrets/*.txt
+.DS_Store
+.idea/
+compose.local.yml

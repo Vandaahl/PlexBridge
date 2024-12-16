@@ -1,0 +1,62 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      actions: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Docker tag
+        id: docker_tag
+        run: |
+          if [[ $GITHUB_REF_TYPE == "tag" ]]; then
+            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          elif [[ $GITHUB_REF_TYPE == "branch" ]]; then
+            echo "TAG=${GITHUB_REF_NAME//\//-}-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+          else
+            echo "TAG=$(git rev-parse --short HEAD)-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+          fi
+
+      - name: Create multi-platform builder
+        run: |
+          docker buildx create --name mybuilder --use
+          docker buildx inspect --bootstrap
+
+      - name: Build and push Docker image
+        run: |
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --tag ghcr.io/${REPO_OWNER}/${REPO_NAME}:${{ env.TAG }} \
+            --push .

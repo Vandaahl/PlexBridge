@@ -1,0 +1,2 @@
+[2024-12-16T14:48:10.522297+00:00] request.INFO: Matched route "home". {"route":"home","route_parameters":{"_route":"home","_controller":"App\\Controller\\HomeController::index"},"request_uri":"http://localhost:8000/","method":"GET"} []
+[2024-12-16T14:48:10.705967+00:00] request.INFO: Matched route "_wdt". {"route":"_wdt","route_parameters":{"_route":"_wdt","_controller":"web_profiler.controller.profiler::toolbarAction","token":"3ec34a"},"request_uri":"http://localhost:8000/_wdt/3ec34a?XDEBUG_IGNORE=1","method":"GET"} []

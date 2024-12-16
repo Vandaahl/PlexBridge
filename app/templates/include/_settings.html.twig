@@ -1,0 +1,23 @@
+{% set services_to_check = ['trakt', 'letterboxd'] %}
+{% set checked_services = {} %}
+
+{% for service in services_to_check %}
+    {% if service in settings.settings.services %}
+        {% set checked_services = checked_services|merge({ (service): 'checked="checked"' }) %}
+    {% else %}
+        {% set checked_services = checked_services|merge({ (service): null }) %}
+    {% endif %}
+{% endfor %}
+
+<h2>Activate your services</h2>
+<form action="{{ path('home') }}" method="post" id="servicesForm">
+    <span>Trakt</span>
+    <input type="checkbox" name="services[]" id="serviceTrakt" value="trakt" {{ checked_services.trakt }}>
+    <label for="serviceTrakt"></label>
+
+    <span>Letterboxd</span>
+    <input type="checkbox" name="services[]" id="serviceLetterboxd" value="letterboxd" {{ checked_services.letterboxd }}>
+    <label for="serviceLetterboxd"></label>
+
+    <input type="submit" name="submitSettings" value="Save">
+</form>

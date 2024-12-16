@@ -1,0 +1,79 @@
+<div class="log-table">
+    <table>
+        <caption>
+            Latest outgoing Trakt requests
+        </caption>
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>IMDb</th>
+            <th>Rating</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% if log is defined %}
+                {% for line in log %}
+                    {% if line.added is defined or line.progress is defined %}
+                        {% set link = '' %}
+                        {# action is rating #}
+                        {% if line.movies|first.ids is defined %}
+                            {% if line.movies|first.ids|keys|first == 'imdb' %}
+                                {% set link = '<a target="_blank" rel="noopener" href="https://www.imdb.com/title/' ~ line.movies|first.ids|first ~ '/">' ~ line.movies|first.ids|first ~ '</a>' %}
+                            {% endif %}
+                        {% elseif line.episodes|first.ids is defined %}
+                            {% if line.episodes|first.ids|keys|first == 'imdb' %}
+                                {% set link = '<a target="_blank" rel="noopener" href="https://www.imdb.com/title/' ~ line.episodes|first.ids|first ~ '/">' ~ line.episodes|first.ids|first ~ '</a>' %}
+                            {% endif %}
+                        {# action is scrobble #}
+                        {% elseif line.movie.ids is defined %}
+                            {% if line.movie.ids|keys|first == 'imdb' %}
+                                {% set link = '<a target="_blank" rel="noopener" href="https://www.imdb.com/title/' ~ line.movie.ids|first ~ '/">' ~ line.movie.ids|first ~ '</a>' %}
+                            {% endif %}
+                        {% elseif line.episode.ids is defined %}
+                            {% if line.episode.ids|keys|first == 'imdb' %}
+                                {% set link = '<a target="_blank" rel="noopener" href="https://www.imdb.com/title/' ~ line.episode.ids|first ~ '/">' ~ line.episode.ids|first ~ '</a>' %}
+                            {% endif %}
+                        {% endif %}
+
+                        {% set added = 'scrobbled' %}
+                        {% if line.added is not null %}
+                            {% if line.added.movies == 1 %}
+                                {% set added = 'added movies: 1' %}
+                            {% elseif line.added.shows == 1 %}
+                                {% set added = 'added shows: 1' %}
+                            {% elseif line.added.seasons == 1 %}
+                                {% set added = 'added seasons: 1' %}
+                            {% elseif line.added.episodes == 1 %}
+                                {% set added = 'added episodes: 1' %}
+                            {% endif %}
+                        {% endif %}
+
+                        {% set type = 'movies' %}
+                        {% if line.episodes is not null %}
+                            {% set type = 'episodes' %}
+                        {% elseif line.movie is not null %}
+                            {% set type = 'movie' %}
+                        {% elseif line.episode is not null %}
+                            {% set type = 'episode' %}
+                        {% endif %}
+
+                        <tr>
+                            <td>{% if line.logDate is defined %}{{ line.logDate|date('Y-m-d H:i:s') }}{% endif %}</td>
+                            <td>{{ type }}</td>
+                            <td>{{ link|raw }}</td>
+                            <td>{% if line.movies|first.rating is defined %}
+                                    {{ line.movies|first.rating }}
+                                {% elseif line.episodes|first.rating is defined %}
+                                    {{ line.episodes|first.rating }}
+                                {% endif %}
+                            </td>
+                            <td>{{ added }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
