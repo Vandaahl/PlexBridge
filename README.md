@@ -13,7 +13,7 @@ You can use Docker Compose to launch the application with Nginx. Here is an exam
 ```yaml
 services:
   app:
-    image: ghcr.io/vandaahl/plexbridge:main
+    image: ghcr.io/vandaahl/plexbridge:latest
     restart: unless-stopped
     working_dir: /app
     volumes:

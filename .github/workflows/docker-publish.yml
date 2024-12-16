@@ -41,10 +41,10 @@ jobs:
         run: |
           if [[ $GITHUB_REF_TYPE == "tag" ]]; then
             echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
-          elif [[ $GITHUB_REF_TYPE == "branch" ]]; then
-            echo "TAG=${GITHUB_REF_NAME//\//-}-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+          elif [[ $GITHUB_REF_NAME == "main" ]]; then
+            echo "TAG=latest" >> $GITHUB_ENV
           else
-            echo "TAG=$(git rev-parse --short HEAD)-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+            echo "TAG=${GITHUB_REF_NAME//\//-}-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
           fi
 
       - name: Create multi-platform builder
@@ -52,11 +52,10 @@ jobs:
           docker buildx create --name mybuilder --use
           docker buildx inspect --bootstrap
 
-      - name: Build and push Docker image
-        run: |
-          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
-          docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            --tag ghcr.io/${REPO_OWNER}/${REPO_NAME}:${{ env.TAG }} \
-            --push .
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/username/repo:${{ env.TAG }}
