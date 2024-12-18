@@ -12,7 +12,8 @@ You can use Docker Compose to launch the application with Nginx. Here is an exam
 
 ```yaml
 services:
-  app:
+  # The nginx container expects this service to be called plexbridge-app, changing the name it will break things (use container_name key instead)
+  plexbridge-app:
     image: ghcr.io/vandaahl/plexbridge:latest
     restart: unless-stopped
     working_dir: /app
@@ -28,7 +29,7 @@ services:
       - letterboxd_cookie_user_value
       - letterboxd_cookie_csrf_value
 
-  nginx:
+  plexbridge-nginx:
     image: cgr.dev/chainguard/nginx
     restart: unless-stopped
     ports:
