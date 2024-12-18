@@ -14,7 +14,7 @@ class UtilityService
 
         if ($secret === false) {
             // For Podman compatability, check if the secret is available as an environment variable.
-            $secret = getenv($filename);
+            $secret = getenv(strtoupper($filename));
         }
 
         return $secret;
