@@ -40,7 +40,7 @@ class HttpClient
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function send(string $endpoint, string $method = 'POST', array $data = null, array $headers = []): array|string
+    public function send(string $endpoint, string $method = 'POST', ?array $data = null, array $headers = []): array|string
     {
         $requestData = [];
 
@@ -118,7 +118,7 @@ class HttpClient
      * @param string|null $logPrefix Used to determine which log to write to. Valid values are trakt or letterboxd.
      * @return void
      */
-    public function enableLogging(bool $status, string $logPrefix = null): void
+    public function enableLogging(bool $status, ?string $logPrefix = null): void
     {
         $this->loggingEnabled = $status;
         if ($logPrefix) {
