@@ -10,6 +10,13 @@ class UtilityService
      */
     public function getDockerSecret(string $filename): false|string
     {
-        return file_get_contents("/run/secrets/$filename");
+        $secret = file_get_contents("/run/secrets/$filename");
+
+        if ($secret === false) {
+            // For Podman compatability, check if the secret is available as an environment variable.
+            $secret = getenv($filename);
+        }
+
+        return $secret;
     }
 }
