@@ -13,8 +13,8 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 
 # Create the settings.json file with placeholder content
 RUN mkdir -p var
-RUN echo '{"settings":{"services":["letterboxd"]}}' > var/settings.json
-RUN echo '{}' > var/trakt-token-data.json
+RUN if [ ! -f var/settings.json ]; then echo '{"settings":{"services":["letterboxd"]}}' > var/settings.json; fi
+RUN if [ ! -f var/trakt-token-data.json ]; then echo '{}' > var/trakt-token-data.json; fi
 
 # Expose application port
 EXPOSE 8000
