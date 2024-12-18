@@ -46,7 +46,7 @@ class LetterboxdService
         $this->httpClient->enableLogging(false);
 
         $searchPage = $this->httpClient->send(
-            $this::LETTERBOXD_SEARCH_URL . $imdbId,
+            $this::LETTERBOXD_SEARCH_URL . $imdbId . "/",
             'GET'
         );
 
@@ -129,7 +129,7 @@ class LetterboxdService
     private function getMovieIdFromMarkup(string $markup): ?string
     {
         // var filmData = { id: 37598,
-        if (preg_match('/var filmData = { id: (.*?),/is', $markup, $matches)) {
+        if (preg_match('/data.production.filmId = (.*?);/is', $markup, $matches)) {
             return $matches[1];
         }
 
