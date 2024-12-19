@@ -8,7 +8,7 @@ PlexBridge is a Docker-based web application that can be used to automatically s
 
 ## How to use
 
-You can use Docker Compose to launch the application with Nginx. Here is an example compose.yml file:
+You can use Docker Compose to launch the application (on port 8000 by default). Here is an example compose.yml file:
 
 ```yaml
 services:
@@ -23,6 +23,8 @@ services:
       # Port in URL must match port assigned to nginx
       - TRAKT_REDIRECT_URL=http://localhost:8000/redirect
       - TZ=Europe/Amsterdam
+    ports:
+      - "8000:80"
     secrets:
       - trakt_client_id
       - trakt_client_secret
@@ -71,6 +73,7 @@ create two files: **letterboxd_cookie_csrf_value.txt** and **letterboxd_cookie_u
 
 - PHP 8.2
 - Symfony 7.2
+- Nginx
 - Open Props CSS library
 - Official Trakt API
 - Letterboxd integration based on cookies

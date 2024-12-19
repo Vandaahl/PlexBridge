@@ -10,6 +10,8 @@ services:
       # Port in URL must match port assigned to nginx
       - TRAKT_REDIRECT_URL=http://localhost:8000/redirect
       - TZ=Europe/Amsterdam
+    ports:
+      - "8000:80"
     secrets:
       - trakt_client_id
       - trakt_client_secret
