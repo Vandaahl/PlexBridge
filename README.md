@@ -12,13 +12,10 @@ You can use Docker Compose to launch the application with Nginx. Here is an exam
 
 ```yaml
 services:
-  # The nginx container expects this service to be called plexbridge-app, changing the name it will break things (use container_name key instead)
   plexbridge-app:
     image: ghcr.io/vandaahl/plexbridge:latest
     restart: unless-stopped
-    working_dir: /app
     volumes:
-      - app-data:/app
       - ./logs:/app/var/log
       - ./settings.json:/app/var/settings.json
       - ./trakt-token-data.json:/app/var/trakt-token-data.json
@@ -32,17 +29,6 @@ services:
       - letterboxd_cookie_user_value
       - letterboxd_cookie_csrf_value
 
-  plexbridge-nginx:
-    image: cgr.dev/chainguard/nginx
-    restart: unless-stopped
-    ports:
-      - "8000:80"
-    volumes:
-      - app-data:/app:ro
-    user: root
-    entrypoint: ["nginx"]
-    command: ["-g", "daemon off;", "-c", "/app/nginx.conf"]
-
 secrets:
   trakt_client_id:
     file: secrets/trakt_client_id.txt
@@ -52,9 +38,6 @@ secrets:
     file: secrets/letterboxd_cookie_user_value.txt
   letterboxd_cookie_csrf_value:
     file: secrets/letterboxd_cookie_csrf_value.txt
-
-volumes:
-  app-data:
 ```
 When you run the command `docker compose up -d`, this starts the app at http://localhost:8000. Take note of the port: if you would like to use another port instead of port 8000, replace both instances in TRAKT_REDIRECT_URL=http://localhost:8000/redirect and in 'ports:
       - "8000:80"'. If you are not running the app on http://localhost but for instance an IP-address, change the value of TRAKT_REDIRECT_URL environment variable to the correct IP, e.g. http://192.168.1.200:8000.
