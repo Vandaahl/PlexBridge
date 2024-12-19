@@ -71,7 +71,7 @@ RUN mkdir -p /run/nginx && chown -R nginx:nginx /run/nginx
 USER nginx
 
 # Expose the port used by Nginx
-EXPOSE 80
+EXPOSE 8080
 
 # Default command to run Nginx
 #CMD ["-c", "/etc/nginx/nginx.conf", "-e", "/dev/stderr", "-g", "daemon off;"]

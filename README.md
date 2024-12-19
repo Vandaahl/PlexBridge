@@ -24,7 +24,7 @@ services:
       - TRAKT_REDIRECT_URL=http://localhost:8000/redirect
       - TZ=Europe/Amsterdam
     ports:
-      - "8000:80"
+      - "8000:8080"
     secrets:
       - trakt_client_id
       - trakt_client_secret
@@ -50,7 +50,7 @@ PlexBridge relies on Plex webhooks. You will need to create a webhook so Plex ca
 
 ### Trakt
 
-If you want to enable Trakt integraton, go to [https://trakt.tv/oauth/applications](https://trakt.tv/oauth/applications) and set up a new application. In the 'Redirect uri' field, enter the value of your TRAKT_REDIRECT_URL environment variable. Check the 'scrobble' checkbox.
+If you want to enable Trakt integration, go to [https://trakt.tv/oauth/applications](https://trakt.tv/oauth/applications) and set up a new application. In the 'Redirect uri' field, enter the value of your TRAKT_REDIRECT_URL environment variable. Check the 'scrobble' checkbox.
 When you save the new application, you will get a **Client ID** and a **Client Secret**. You need to store these as Docker secrets in a folder called 'secrets' in the root of your project. Create a **trakt_client_id.txt** file and paste your client ID. For your client secret, create a **trakt_client_secret.txt** file and do the same.
 
 Now when you open the PlexBridge app, on the upper right of the screen you can log in to Trakt. 
