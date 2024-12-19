@@ -50,6 +50,9 @@ class SyncService
         $data = json_decode($postData, true);
         /** @var string $event E.g. 'media.play', 'media.stop', 'media.scrobble', 'media.rate' */
         $event = $data['event'];
+        if (in_array($event, ['media.play', 'media.stop','media.pause'])) {
+            return;
+        }
         $metadata = $data['Metadata'];
         $lastRatedAt = (isset($metadata['lastRatedAt'])) ? date('Y-m-d\TH:i:s\.\0\0\0\Z', $metadata['lastRatedAt']) : null;
         $rating = $data['rating'] ?? 0;
