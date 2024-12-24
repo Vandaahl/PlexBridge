@@ -41,16 +41,18 @@ class SyncService
      */
     public function handleIncomingRequests(string $postData): void
     {
+        /** @var array{event: string, rating: float, Account: array{id: int, thumb: string, title: string}, Metadata: array{title: string, originalTitle: string, summary: string, year: int, type: string, lastRatedAt: int, Guid: array{array{id: string}}, Director: array{array{tag: string}}}} $data */
+        $data = json_decode($postData, true);
+        $this->incomingLogger->info($postData);
+
         $settings = $this->settingsService->getSettingsFromStorage();
         if (!$settings or count($settings['settings']['services']) === 0) {
             return;
         }
 
-        /** @var array{event: string, rating: float, Account: array{id: int, thumb: string, title: string}, Metadata: array{title: string, originalTitle: string, summary: string, year: int, type: string, lastRatedAt: int, Guid: array{array{id: string}}, Director: array{array{tag: string}}}} $data */
-        $data = json_decode($postData, true);
         /** @var string $event E.g. 'media.play', 'media.stop', 'media.scrobble', 'media.rate' */
         $event = $data['event'];
-        if (in_array($event, ['media.play', 'media.stop','media.pause'])) {
+        if (in_array($event, ['media.play', 'media.stop','media.pause', 'media.resume'])) {
             return;
         }
         $metadata = $data['Metadata'];
@@ -64,8 +66,6 @@ class SyncService
         if ($type === 'track') {
             return;
         }
-
-        $this->incomingLogger->info($postData);
 
         if (isset($settings['settings']['services']) && in_array('trakt', $settings['settings']['services'])) {
             match ($event) {
