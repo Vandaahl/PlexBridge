@@ -52,7 +52,7 @@ class SyncService
 
         /** @var string $event E.g. 'media.play', 'media.stop', 'media.scrobble', 'media.rate' */
         $event = $data['event'];
-        if (in_array($event, ['media.play', 'media.stop','media.pause', 'media.resume'])) {
+        if (!in_array($event, ['media.rate', 'media.scrobble'])) {
             return;
         }
         $metadata = $data['Metadata'];
@@ -69,8 +69,6 @@ class SyncService
 
         if (isset($settings['settings']['services']) && in_array('trakt', $settings['settings']['services'])) {
             match ($event) {
-                'media.play' => '',
-                'media.stop' => '',
                 'media.scrobble' => $this->traktService->scrobble($guid, $type),
                 'media.rate' => ($lastRatedAt) ? $this->traktService->rateMedia($guid, $rating, $lastRatedAt, $type) : null,
                 default => ''
@@ -79,8 +77,6 @@ class SyncService
 
         if (isset($settings['settings']['services']) && in_array('letterboxd', $settings['settings']['services']) && $type === 'movie') {
             match ($event) {
-                'media.play' => '',
-                'media.stop' => '',
                 'media.scrobble' => $this->letterboxdService->publishActivity($guid, null),
                 'media.rate' => ($lastRatedAt) ? $this->letterboxdService->publishActivity($guid, $rating) : null,
                 default => ''
