@@ -43,6 +43,19 @@ class SyncService
     {
         /** @var array{event: string, rating: float, Account: array{id: int, thumb: string, title: string}, Metadata: array{title: string, originalTitle: string, summary: string, year: int, type: string, lastRatedAt: int, Guid: array{array{id: string}}, Director: array{array{tag: string}}}} $data */
         $data = json_decode($postData, true);
+
+        if (!isset($data['Metadata'])) {
+            return;
+        }
+
+        $metadata = $data['Metadata'];
+        /** @var string $type movie|episode|show|season|track */
+        $type = $metadata['type'];
+
+        if ($type === 'track') {
+            return;
+        }
+
         $this->incomingLogger->info($postData);
 
         $settings = $this->settingsService->getSettingsFromStorage();
@@ -55,17 +68,10 @@ class SyncService
         if (!in_array($event, ['media.rate', 'media.scrobble'])) {
             return;
         }
-        $metadata = $data['Metadata'];
         $lastRatedAt = (isset($metadata['lastRatedAt'])) ? date('Y-m-d\TH:i:s\.\0\0\0\Z', $metadata['lastRatedAt']) : null;
         $rating = $data['rating'] ?? 0;
         $guids = $metadata['Guid'];
-        /** @var string $type movie|episode|show|season|track */
-        $type = $metadata['type'];
         $guid = $this->getGuid($guids, $type);
-
-        if ($type === 'track') {
-            return;
-        }
 
         if (isset($settings['settings']['services']) && in_array('trakt', $settings['settings']['services'])) {
             match ($event) {
