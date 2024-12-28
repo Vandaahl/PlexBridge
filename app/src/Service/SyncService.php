@@ -48,6 +48,12 @@ class SyncService
             return;
         }
 
+        /** @var string $event E.g. 'media.play', 'media.stop', 'media.scrobble', 'media.rate' */
+        $event = $data['event'];
+        if (!in_array($event, ['media.rate', 'media.scrobble'])) {
+            return;
+        }
+
         $metadata = $data['Metadata'];
         /** @var string $type movie|episode|show|season|track */
         $type = $metadata['type'];
@@ -63,11 +69,6 @@ class SyncService
             return;
         }
 
-        /** @var string $event E.g. 'media.play', 'media.stop', 'media.scrobble', 'media.rate' */
-        $event = $data['event'];
-        if (!in_array($event, ['media.rate', 'media.scrobble'])) {
-            return;
-        }
         $lastRatedAt = (isset($metadata['lastRatedAt'])) ? date('Y-m-d\TH:i:s\.\0\0\0\Z', $metadata['lastRatedAt']) : null;
         $rating = $data['rating'] ?? 0;
         $guids = $metadata['Guid'];
