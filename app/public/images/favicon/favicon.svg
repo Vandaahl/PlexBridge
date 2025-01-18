@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><style>
+    #light-icon {
+      display: inline;
+    }
+    #dark-icon {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #light-icon {
+        display: none;
+      }
+      #dark-icon {
+        display: inline;
+      }
+    }
+  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1057)"><rect width="1000" height="1000" fill="#000000"></rect><g transform="matrix(1.4,0,0,1.4,150,215.10000000000002)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="500" height="407"><svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 57" width="500" height="407">
+	<title>logo</title>
+	<style>
+		.s0 { fill: #ffffff } 
+	</style>
+	<g id="SvgjsG2241">
+		<path class="s0" d="m0 0v56.9h70v-56.9zm13.1 52.5h-8.7v-8.8l8.7 0.1zm0-13.2h-8.7v-8.7h8.7zm0-13.2h-8.7v-8.7h8.7zm0-13.1h-8.7v-8.8h8.7zm13.2 30.6v-30.6l21.8 15.3zm39.4 8.8h-8.7v-8.8h8.7zm0-13.1h-8.7v-8.7h8.7zm0-13.2h-8.7v-8.7h8.7zm0-13.1h-8.7v-8.8h8.7z"></path>
+	</g>
+	<g id="SvgjsG2242">
+	</g>
+</svg></svg></g></g><defs><clipPath id="SvgjsClipPath1057"><rect width="1000" height="1000" x="0" y="0" rx="0" ry="0"></rect></clipPath></defs></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><g><g transform="matrix(2,0,0,2,0,93)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="500" height="407"><svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 57" width="500" height="407">
+	<title>logo</title>
+	<style>
+		.s0 { fill: #ffffff } 
+	</style>
+	<g id="SvgjsG2241">
+		<path class="s0" d="m0 0v56.9h70v-56.9zm13.1 52.5h-8.7v-8.8l8.7 0.1zm0-13.2h-8.7v-8.7h8.7zm0-13.2h-8.7v-8.7h8.7zm0-13.1h-8.7v-8.8h8.7zm13.2 30.6v-30.6l21.8 15.3zm39.4 8.8h-8.7v-8.8h8.7zm0-13.1h-8.7v-8.7h8.7zm0-13.2h-8.7v-8.7h8.7zm0-13.1h-8.7v-8.8h8.7z"></path>
+	</g>
+	<g id="SvgjsG2242">
+	</g>
+</svg></svg></g></g></svg></g></svg>
