@@ -6,12 +6,11 @@ use App\DataTransferObject\LetterboxdLogEntryDTO;
 use App\Service\SyncService;
 use App\Service\Trakt\TraktService;
 use App\Service\Utility\LogService;
-use App\Service\Utility\SettingsService;;
+use App\Service\Utility\SettingsService;
 use App\Service\Utility\UtilityService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -67,9 +66,9 @@ class HomeController extends AbstractController
      * @throws ClientExceptionInterface
      */
     #[Route('/sync', name: 'sync')]
-    public function sync(RequestStack $requestStack, SyncService $syncService): Response
+    public function sync(Request $request, SyncService $syncService): Response
     {
-        $postData = $requestStack->getCurrentRequest()->request->get('payload');
+        $postData = $request->request->get('payload');
         if ($postData) {
             $syncService->handleIncomingRequests($postData);
         }
