@@ -56,7 +56,6 @@ class LetterboxdService
             throw new \Exception("Movie with ID $imdbId not found");
         }
 
-        //$url = $this->httpClient->getUrl();
         $url = $this::LETTERBOXD_ACTIVITY_URL . "{$filmId}";
 
         $result = $this->submitActivity('watched', $url);
@@ -128,7 +127,6 @@ class LetterboxdService
      */
     private function getMovieIdFromMarkup(string $markup): ?string
     {
-        // var filmData = { id: 37598,
         if (preg_match('/data.production.filmId = (.*?);/is', $markup, $matches)) {
             return $matches[1];
         }
