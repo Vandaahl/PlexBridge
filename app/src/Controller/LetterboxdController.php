@@ -8,27 +8,9 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class LetterboxdController extends AbstractController
 {
-    /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
-     */
-    #[Route('/letterboxd', name: 'letterboxd_home')]
-    public function index(LetterboxdService $letterboxdService): Response
-    {
-        dd($letterboxdService->publishActivity('tt4225622', 7));
-    }
-
     #[Route('/letterboxd_retry', name: 'letterboxd_retry')]
     public function retry(Request $request, LetterboxdService $letterboxdService, LoggerInterface $letterboxd_retriesLogger): Response
     {
