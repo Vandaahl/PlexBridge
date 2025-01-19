@@ -1,0 +1,45 @@
+# see https://edu.chainguard.dev/chainguard/migration/migrating-php/
+
+# use this compose file with 'docker compose -f compose.dev.yml up'
+
+services:
+  app:
+    image: cgr.dev/chainguard/laravel:latest-dev
+    restart: unless-stopped
+    volumes:
+      - ./app:/app
+    environment:
+      # Port in URL must match port assigned to nginx
+      - TRAKT_REDIRECT_URL=http://localhost:8000/redirect
+      - TZ=Europe/Amsterdam
+    secrets:
+      - trakt_client_id
+      - trakt_client_secret
+      - letterboxd_cookie_user_value
+      - letterboxd_cookie_csrf_value
+    networks:
+      - wolfi
+
+  nginx:
+    image: cgr.dev/chainguard/nginx:latest-dev
+    volumes:
+      - ./app:/app
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8000:8080"
+    networks:
+      - wolfi
+
+secrets:
+  trakt_client_id:
+    file: secrets/trakt_client_id.txt
+  trakt_client_secret:
+    file: secrets/trakt_client_secret.txt
+  letterboxd_cookie_user_value:
+    file: secrets/letterboxd_cookie_user_value.txt
+  letterboxd_cookie_csrf_value:
+    file: secrets/letterboxd_cookie_csrf_value.txt
+
+networks:
+  wolfi:
+    driver: bridge
