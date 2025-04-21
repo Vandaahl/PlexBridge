@@ -2,14 +2,17 @@
 
 namespace App\Service;
 
+use App\DataTransferObject\PlexEventDTO;
+use App\Entity\Episode;
+use App\Entity\Event;
+use App\Entity\Movie;
 use App\Service\Letterboxd\LetterboxdService;
 use App\Service\Trakt\TraktService;
 use App\Service\Utility\SettingsService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Psr\Log\LoggerInterface;
 
 class SyncService
@@ -19,6 +22,7 @@ class SyncService
         private TraktService $traktService,
         private LetterboxdService $letterboxdService,
         private SettingsService $settingsService,
+        private EntityManagerInterface $entityManager,
     )
     {
         // Get the timezone from the Docker environment variable.
@@ -34,10 +38,9 @@ class SyncService
      * @param string $postData
      * @return void
      * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
+     * @throws \Exception
      */
     public function handleIncomingRequests(string $postData): void
     {
@@ -48,67 +51,129 @@ class SyncService
             return;
         }
 
-        /** @var string $event E.g. 'media.play', 'media.stop', 'media.scrobble', 'media.rate' */
-        $event = $data['event'];
-        if (!in_array($event, ['media.rate', 'media.scrobble'])) {
+        $plexData = PlexEventDTO::fromArray($data);
+
+        if (!in_array($plexData->event, ['media.rate', 'media.scrobble'])) {
             return;
         }
 
-        $metadata = $data['Metadata'];
-        /** @var string $type movie|episode|show|season|track */
-        $type = $metadata['type'];
-
-        if ($type === 'track') {
+        if ($plexData->type === 'track') {
             return;
         }
 
         $this->incomingLogger->info($postData);
 
-        $settings = $this->settingsService->getSettingsFromStorage();
-        if (!$settings or count($settings['settings']['services']) === 0) {
+        $event = new Event();
+        $event->setDate(new \DateTimeImmutable($plexData->date));
+        $event->setRating($plexData->rating);
+        $event->setEvent($plexData->event);
+        $event->setPlexUser($plexData->user);
+        $this->entityManager->persist($event);
+
+        $movie = $episode = null;
+
+        if ($plexData->type === 'movie') {
+            if (!$movie = $this->checkIfMediaExists($plexData->guid, Movie::class)) {
+                $movie = new Movie();
+                $movie->setTitle($plexData->title);
+                $movie->setYear($plexData->year);
+                $movie->setImdb($plexData->imdb);
+                $movie->setOriginalTitle($plexData->originalTitle);
+                $movie->setPlexGuid($plexData->guid);
+                $this->entityManager->persist($movie);
+            }
+        } elseif ($plexData->type === 'episode') {
+            if (!$episode = $this->checkIfMediaExists($plexData->guid, Episode::class)) {
+                $episode = new Episode();
+                $episode->setTitle($plexData->title);
+                $episode->setYear($plexData->year);
+                $episode->setImdb($plexData->imdb);
+                $episode->setPlexGuid($plexData->guid);
+                $this->entityManager->persist($episode);
+            }
+        }
+
+        if ($movie) {
+            $event->setMovie($movie);
+        } elseif ($episode) {
+            $event->setEpisode($episode);
+        }
+
+        $this->entityManager->persist($event);
+        $this->entityManager->flush();
+
+        $activeServices = $this->settingsService->getSettings('services');
+        if (count($activeServices) === 0) {
             return;
         }
 
-        $lastRatedAt = (isset($metadata['lastRatedAt'])) ? date('Y-m-d\TH:i:s\.\0\0\0\Z', $metadata['lastRatedAt']) : null;
-        $rating = $data['rating'] ?? 0;
-        $guids = $metadata['Guid'];
-        $guid = $this->getGuid($guids, $type);
+        $guid = $this->getGuid($plexData->imdb, $plexData->type);
 
-        if (isset($settings['settings']['services']) && in_array('trakt', $settings['settings']['services'])) {
-            match ($event) {
-                'media.scrobble' => $this->traktService->scrobble($guid, $type),
-                'media.rate' => ($lastRatedAt) ? $this->traktService->rateMedia($guid, $rating, $lastRatedAt, $type) : null,
+        if (in_array('trakt', $activeServices)) {
+            $action = match ($plexData->event) {
+                'media.scrobble' => function () use ($plexData, $event, $guid) {
+                    if ($this->traktService->scrobble($guid, $plexData->type)) {
+                        $event->setStatusTrakt('scrobbled');
+                    }
+                },
+                'media.rate' => function() use($plexData, $event, $guid) {
+                    if ($plexData->rating) {
+                        $response = $this->traktService->rateMedia($guid, $plexData->rating, $plexData->date, $plexData->type);
+                        if ($response) {
+                            $event->setStatusTrakt($response);
+                        }
+                    }
+                },
                 default => ''
             };
+
+            $action(); // Call the selected closure
+            $this->entityManager->flush();
         }
 
-        if (isset($settings['settings']['services']) && in_array('letterboxd', $settings['settings']['services']) && $type === 'movie') {
-            match ($event) {
-                'media.scrobble' => $this->letterboxdService->publishActivity($guid, null),
-                'media.rate' => ($lastRatedAt) ? $this->letterboxdService->publishActivity($guid, $rating) : null,
+        if (in_array('letterboxd', $activeServices) && $plexData->type === 'movie') {
+            $action = match ($plexData->event) {
+                'media.scrobble' => function() use ($movie, $event, $guid) {
+                    $this->letterboxdService->publishActivity($movie, $guid, $event);
+                },
+                'media.rate' => function() use ($movie, $event, $plexData, $guid) {
+                    if ($plexData->rating === null) {
+                        return;
+                    }
+                    $this->letterboxdService->publishActivity($movie, $guid, $event, $plexData->rating);
+                },
                 default => ''
             };
+
+            $action(); // Call the selected closure
         }
     }
 
     /**
-     * @param array{array{id: string}} $ids "imdb://tt0033467", "tmdb://4267", "tvdb://1747"
+     * @param string $id "imdb://tt0033467", "tmdb://4267", "tvdb://1747"
      * @param string|null $type movie|episode|show|season
      * @return string|null tt0033467
      */
-    private function getGuid(array $ids, ?string $type): ?string
+    private function getGuid(string $id, ?string $type): ?string
     {
         $brand = 'imdb';
         $prefix = "$brand://";
 
-        $result = array_filter($ids, function($id) use ($brand) {
-            return str_starts_with($id['id'], $brand);
-        });
-
-        if ($result) {
-            return str_replace($prefix, '', reset($result)['id']);
+        if (!str_starts_with($id, $prefix)) {
+            return null;
         }
 
-        return null;
+        return str_replace($prefix, '', $id);
+    }
+
+    /**
+     * @param string $plexGuid
+     * @param string $className FQN
+     * @return Movie|Episode|null
+     */
+    private function checkIfMediaExists(string $plexGuid, string $className): Movie|Episode|null
+    {
+        $repository = $this->entityManager->getRepository($className);
+        return $repository->findOneBy(['plexGuid' => $plexGuid]);
     }
 }

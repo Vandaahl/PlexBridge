@@ -1,4 +1,4 @@
-# Stage 1: Build the Laravel application
+# Stage 1: Build the application
 FROM cgr.dev/chainguard/laravel:latest-dev AS builder
 
 # Set working directory
@@ -27,12 +27,7 @@ ENV APP_ENV=prod
 RUN curl -sS https://getcomposer.org/installer | php && \
     php composer.phar install --no-dev --prefer-dist --optimize-autoloader
 
-# Create the settings.json file with placeholder content
-RUN mkdir -p var
-RUN if [ ! -f var/settings.json ]; then echo '{"settings":{"services":["letterboxd"]}}' > var/settings.json; fi
-RUN if [ ! -f var/trakt-token-data.json ]; then echo '{}' > var/trakt-token-data.json; fi
-
-# Stage 2: Final container with Nginx and Laravel application
+# Stage 2: Final container with Nginx and application
 FROM cgr.dev/chainguard/nginx:latest-dev
 
 # Copy the PHP binaries and necessary files from the builder stage
@@ -47,7 +42,7 @@ COPY --from=builder /lib /lib
 COPY --from=builder /lib64 /lib64
 COPY --from=builder /var/lib /var/lib
 
-# Copy the Laravel application from the builder stage
+# Copy the application from the builder stage
 COPY --from=builder /app /app
 
 # Log and show the name of the user inside the container

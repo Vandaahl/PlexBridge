@@ -27,7 +27,7 @@ class HttpClient
     }
 
     /**
-     * Send json requests to an API. Also keeps track of response status.
+     * Send JSON requests to an API. Also keeps track of response status.
      *
      * @param string $endpoint Endpoint to call.
      * @param string $method The HTTP method to use (one of GET, POST, PUT, DELETE).
@@ -87,9 +87,9 @@ class HttpClient
      * Log all requests to a file.
      *
      * @param  string $endpoint URL.
-     * @param  array $headers Headers containing for example an authorization bearer token.
-     * @param  string $postData Querystring or json string with data posted.
-     * @param  int $responseCode Status code returned by remote server.
+     * @param  array $headers Headers containing, for example, an authorization bearer token.
+     * @param  string $postData Querystring or JSON string with data posted.
+     * @param  int $responseCode Status code returned by the remote server.
      * @param string $response Json response returned by remote server.
      * @return void
      */

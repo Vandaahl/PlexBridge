@@ -176,3 +176,7 @@ body {
     margin-left: var(--size-1);
     vertical-align: text-bottom;
 }
+
+.nowrap {
+    white-space: nowrap;
+}

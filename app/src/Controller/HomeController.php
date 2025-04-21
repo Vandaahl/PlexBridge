@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use App\DataTransferObject\LetterboxdLogEntryDTO;
+use App\Entity\Event;
 use App\Service\SyncService;
 use App\Service\Trakt\TraktService;
-use App\Service\Utility\LogService;
 use App\Service\Utility\SettingsService;
 use App\Service\Utility\UtilityService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,8 +21,12 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class HomeController extends AbstractController
 {
+    public function __construct(private readonly EntityManagerInterface $entityManager)
+    {
+    }
+
     #[Route('/', name: 'home')]
-    public function index(TraktService $traktService, SettingsService $settingService, Request $request, LogService $logService, UtilityService $utilityService): Response
+    public function index(TraktService $traktService, SettingsService $settingService, Request $request, UtilityService $utilityService): Response
     {
         $settingsSaved = false;
         if ($request->request->get('submitSettings')) {
@@ -31,30 +35,43 @@ class HomeController extends AbstractController
             $settingsSaved = true;
         }
 
+        $activatedServices = $settingService->getSettings('services');
         $isTraktLoggedIn = $isTraktPrepared = $isLetterboxdPrepared = $traktLog = $letterboxdLog = null;
-        if (isset($settingService->getSettingsFromStorage()['settings']['services'])) {
-            if (in_array('trakt', $settingService->getSettingsFromStorage()['settings']['services'])) {
+        if (count($activatedServices)) {
+            if (in_array('trakt', $activatedServices)) {
                 $isTraktLoggedIn = $traktService->isAccessTokenValid();
                 $isTraktPrepared = $utilityService->getDockerSecret('trakt_client_id') && $utilityService->getDockerSecret('trakt_client_secret');
-                $traktLog = $logService->getLatestLogLines('trakt', 10);
             }
-            if (in_array('letterboxd', $settingService->getSettingsFromStorage()['settings']['services'])) {
+            if (in_array('letterboxd', $activatedServices)) {
                 $isLetterboxdPrepared = $utilityService->getDockerSecret('letterboxd_cookie_user_value') && $utilityService->getDockerSecret('letterboxd_cookie_csrf_value');
-                /** @var LetterboxdLogEntryDTO[] $letterboxdLog */
-                $letterboxdLog = $logService->getLatestLogLines('letterboxd', 10);
             }
         }
 
+        /*$events = $this->entityManager->getRepository(Event::class)->findBy(
+            [],
+            ['id' => 'DESC'],
+            10
+        );*/
+
+        $events = $this->entityManager->createQueryBuilder()
+            ->select('e', 'ep', 'm')
+            ->from(Event::class, 'e')
+            ->leftJoin('e.episode', 'ep')
+            ->leftJoin('e.movie', 'm')
+            ->orderBy('e.id', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+
         return $this->render('base.html.twig', [
             'message' => '',
-            'incomingLog' => $logService->getLatestLogLines('incoming', 10),
-            'traktLog' => $traktLog,
-            'letterboxdLog' => $letterboxdLog,
+            'events' => $events,
             'settingsSaved' => $settingsSaved,
-            'settings' => $settingService->getSettingsFromStorage(),
+            'services' => $activatedServices,
             'isTraktLoggedIn' => $isTraktLoggedIn,
             'isTraktPrepared' => $isTraktPrepared,
             'isLetterboxdPrepared' => $isLetterboxdPrepared,
+            'activatedServices' => $activatedServices,
         ]);
     }
 

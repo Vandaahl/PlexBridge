@@ -2,60 +2,52 @@
 
 namespace App\Service\Utility;
 
+use App\Entity\Setting;
+use Doctrine\ORM\EntityManagerInterface;
+
 class SettingsService
 {
-    public const SETTINGS_LOCATION = "/app/var/settings.json";
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(
+        EntityManagerInterface $entityManager
+    )
+    {
+        $this->entityManager = $entityManager;
+    }
 
     /**
-     * Save settings to disk.
+     * Save settings to the database.
      *
-     * @param array $settings
+     * @param array $settings ['services' => ['trakt', 'letterbox']]
      * @return void
-     * @throws \Exception
      */
     public function saveSettings(array $settings): void
     {
-        $json = $this->prepareSettings($settings);
-        $file = $this::SETTINGS_LOCATION;
+        $repository = $this->entityManager->getRepository(Setting::class);
 
-        if (!file_exists($file)) {
-            if (fopen($file, "w") === false) {
-                throw new \Exception('Failed to create location for settings file');
+        /* @var array $value */
+        foreach ($settings as $key => $value) {
+            $setting = $repository->findOneBy(['settingKey' => $key]);
+            if (!$setting) {
+                $setting = new Setting();
+                $setting->setSettingKey($key);
             }
-        }
-
-        if (file_put_contents($file, $json) === false) {
-            throw new \Exception('Failed to save settings to disk');
+            $setting->setSettingValue($value);
+            $this->entityManager->persist($setting);
+            $this->entityManager->flush();
         }
     }
 
-    /**
-     * @return null|array{settings: array}
-     * @throws \Exception
-     */
-    public function getSettingsFromStorage(): ?array
+    public function getSettings(string $key): array
     {
-        $settings = file_get_contents($this::SETTINGS_LOCATION);
+        $repository = $this->entityManager->getRepository(Setting::class);
+        $setting = $repository->findOneBy(['settingKey' => $key]);
 
-        if ($settings === "") {
-            return null;
+        if ($setting) {
+            return $setting->getSettingValue();
         }
 
-        if ($settings === false) {
-            throw new \Exception('Failed to load settings from disk');
-        }
-
-        $settings = json_decode($settings, true);
-
-        if (!$settings) {
-            throw new \Exception('Failed to convert settings data to array');
-        }
-
-        return $settings;
-    }
-
-    private function prepareSettings(array $settings): false|string
-    {
-        return json_encode(['settings' => $settings]);
+        return [];
     }
 }

@@ -17,8 +17,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/app/var/log
-      - ./settings.json:/app/var/settings.json
-      - ./trakt-token-data.json:/app/var/trakt-token-data.json
       - ./data.db:/app/var/data.db
     environment:
       # Port in URL must match port assigned to nginx
@@ -75,6 +73,7 @@ create two files: **letterboxd_cookie_csrf_value.txt** and **letterboxd_cookie_u
 - PHP 8.2
 - Symfony 7.2
 - Nginx
+- SQLite database
 - Open Props CSS library
 - Official Trakt API
 - Letterboxd integration based on cookies

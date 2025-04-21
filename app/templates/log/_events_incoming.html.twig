@@ -1,0 +1,72 @@
+<div class="log-table">
+    <table>
+        <caption>
+            Latest incoming Plex requests
+        </caption>
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Event</th>
+            <th>IMDb</th>
+            <th>Rating</th>
+            <th>Plex username</th>
+            <th>Title</th>
+            <th>Year</th>
+            {% if 'trakt' in activatedServices %}<th>Trakt activity</th>{% endif %}
+            {% if 'letterboxd' in activatedServices %}<th>Letterboxd activity</th>{% endif %}
+        </tr>
+        </thead>
+        <tbody>
+            {% if events is defined %}
+                {% for event in events %}
+                    {% set link = '' %}
+                    {% set media = (event.movie is not null) ? event.movie : event.episode %}
+                    {% if media.imdb is defined %}
+                        {% set link = '<a target="_blank" rel="noopener" href="https://www.imdb.com/title/' ~ media.imdb|slice(7) ~ '/">' ~ media.imdb|slice(7) ~ '</a>' %}
+                    {% endif %}
+                    <tr>
+                        <td class="nowrap">{{ event.date|date('Y-m-d H:i:s') }}</td>
+                        <td>{{ event.event }}</td>
+                        <td>{{ link|raw }}</td>
+                        <td>{% if event.rating is defined %}{{ event.rating }}{% endif %}</td>
+                        <td>{% if event.plexUser is defined %}{{ event.plexUser }}{% endif %}</td>
+                        <td class="nowrap">{% if media.title is defined %}{{ media.title }}{% endif %}</td>
+                        <td>{% if media.year is defined %}{{ media.year }}{% endif %}</td>
+                        {% if 'trakt' in activatedServices %}<td>{{ event.statusTrakt }}</td>{% endif %}
+                        {% if 'letterboxd' in activatedServices %}
+                            <td>
+                                {{ event.statusLetterboxd }}
+                                {% if event.statusLetterboxd == 'failed' and media.letterboxdId is defined %}
+                                <form action="{{ path('letterboxd_retry') }}" id="letterboxd-retry-{{ loop.index }}-form" class="inline retry-form" method="post">
+                                    <input type="hidden" name="token" value="{{ csrf_token('retry-letterboxd') }}">
+                                    <input type="hidden" name="rating" value="{{ event.rating }}">
+                                    <input type="hidden" name="id" value="{{ media.letterboxdId }}">
+                                    <input type="hidden" name="eventId" value="{{ event.id }}">
+                                    <a href="#" onclick="document.getElementById('letterboxd-retry-{{ loop.index }}-form').submit()">
+                                        <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="#bcbcbc"
+                                                stroke-width="2"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                        >
+                                            <path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/>
+                                        </svg>
+                                    </a>
+                                    <noscript>
+                                        <input type="submit" value="retry" />
+                                    </noscript>
+                                </form>
+                            {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>

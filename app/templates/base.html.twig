@@ -35,7 +35,7 @@
                     </svg>
                 </a>
                 <div>
-                    {% if 'trakt' in settings.settings.services %}
+                    {% if 'trakt' in services %}
                         {% if isTraktLoggedIn is same as false %}
                             <a href="{{ path('login') }}" class="text-sm font-semibold leading-6">Log in with Trakt<span aria-hidden="true">&rarr;</span></a>
                         {% else %}
@@ -48,11 +48,11 @@
 
         <main>
             <section>
-                {% if 'trakt' in settings.settings.services and isTraktPrepared is same as false %}
+                {% if 'trakt' in services and isTraktPrepared is same as false %}
                     <p class="warning">Warning: you have enabled Trakt but the client ID or client secret is not configured. Please read the instructions on how to configure your Trakt settings.</p>
                 {% endif %}
 
-                {% if 'letterboxd' in settings.settings.services and isLetterboxdPrepared is same as false %}
+                {% if 'letterboxd' in services and isLetterboxdPrepared is same as false %}
                     <p class="warning">Warning: you have enabled Letterboxd but the required cookie is not configured. Please read the instructions on how to configure your Letterboxd cookie.</p>
                 {% endif %}
 
@@ -65,21 +65,16 @@
 
                 {% if settingsSaved %}
                     <div class="text-center">Settings were saved!</div>
-                {% elseif settings is defined %}
-                    {{ include('include/_settings.html.twig', {settings: settings}) }}
+                {% endif %}
+                {% if services is defined %}
+                    {{ include('include/_settings.html.twig', {services: services}) }}
                 {% endif %}
             </section>
             <section>
-                {% if incomingLog %}
-                    {{ include('log/_log_incoming.html.twig', {log: incomingLog}) }}
+                {% if events %}
+                    {{ include('log/_events_incoming.html.twig', {events: events}) }}
                 {% else %}
                     <p><em>Looks like there is no incoming Plex activity yet</em> 😴</p>
-                {% endif %}
-                {% if traktLog %}
-                    {{ include('log/_log_trakt.html.twig', {log: traktLog}) }}
-                {% endif %}
-                {% if letterboxdLog %}
-                    {{ include('log/_log_letterboxd.html.twig', {log: letterboxdLog}) }}
                 {% endif %}
             </section>
         </main>

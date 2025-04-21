@@ -2,7 +2,7 @@
 {% set checked_services = {} %}
 
 {% for service in services_to_check %}
-    {% if service in settings.settings.services %}
+    {% if service in services %}
         {% set checked_services = checked_services|merge({ (service): 'checked="checked"' }) %}
     {% else %}
         {% set checked_services = checked_services|merge({ (service): null }) %}

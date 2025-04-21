@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Service\Letterboxd\LetterboxdService;
 use Symfony\Component\HttpFoundation\Request;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class LetterboxdController extends AbstractController
 {
     #[Route('/letterboxd_retry', name: 'letterboxd_retry')]
-    public function retry(Request $request, LetterboxdService $letterboxdService, LoggerInterface $letterboxd_retriesLogger): Response
+    public function retry(Request $request, LetterboxdService $letterboxdService): Response
     {
         $submittedToken = $request->request->get('token');
 
@@ -22,13 +21,10 @@ class LetterboxdController extends AbstractController
 
         $rating = $request->request->get('rating');
         $filmId = $request->request->get('id');
-        $logDate = $request->request->get('date');
-
-        // Add the movie to the retries log, so we can use it to not display the retry button next to the specific entry.
-        $letterboxd_retriesLogger->info("{\"originalLogDate\": \"$logDate\", \"id\": \"$filmId\"}");
+        $eventId = $request->request->get('eventId');
 
         if ($filmId && $rating) {
-            $letterboxdService->submitRating($filmId, $rating);
+            $letterboxdService->submitRating($filmId, $rating, $eventId);
         }
 
         return $this->redirectToRoute('home');
