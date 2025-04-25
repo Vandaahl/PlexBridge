@@ -51,15 +51,15 @@ class SyncService
             return;
         }
 
+        if (!in_array($data['event'], ['media.rate', 'media.scrobble'])) {
+            return;
+        }
+
+        if ($data['Metadata']['type'] === 'track') {
+            return;
+        }
+
         $plexData = PlexEventDTO::fromArray($data);
-
-        if (!in_array($plexData->event, ['media.rate', 'media.scrobble'])) {
-            return;
-        }
-
-        if ($plexData->type === 'track') {
-            return;
-        }
 
         $this->incomingLogger->info($postData);
 
