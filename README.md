@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/app/var/log
-      - ./data.db:/app/var/data.db
+      - ./database:/app/var/database
     environment:
       # Port in URL must match port assigned to nginx
       - TRAKT_REDIRECT_URL=http://localhost:8000/redirect

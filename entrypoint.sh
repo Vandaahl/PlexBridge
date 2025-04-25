@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Create database directory if it doesn't exist
-mkdir -p /app/var
+mkdir -p /app/var/database
 
 # Run database migrations
 php /app/bin/console doctrine:migrations:migrate --no-interaction
