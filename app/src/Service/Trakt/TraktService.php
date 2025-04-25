@@ -134,6 +134,10 @@ class TraktService
      */
     public function rateMedia(string $guid, float $rating, string $ratedAt, string $type): string|bool
     {
+        if (!$this->isAccessTokenValid()) {
+            return false;
+        }
+
         $tokenData = $this->getAccessTokenFromStorage();
         $token = $tokenData['access_token'];
         $brand = 'imdb';
@@ -192,6 +196,10 @@ class TraktService
      */
     public function scrobble(string $guid, string $type): bool
     {
+        if (!$this->isAccessTokenValid()) {
+            return false;
+        }
+
         $tokenData = $this->getAccessTokenFromStorage();
         $token = $tokenData['access_token'];
         $brand = 'imdb';
