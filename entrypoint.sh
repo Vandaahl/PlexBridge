@@ -8,7 +8,9 @@ fi
 
 # Create database directory if it doesn't exist
 mkdir -p /app/var/database
-chown nginx:nginx /app/var/database
+echo "Current user is: $(whoami)"
+echo "User details: $(id)"
+chown $(whoami):$(whoami) /app/var/database
 chmod 755 /app/var/database
 
 # Run database migrations
