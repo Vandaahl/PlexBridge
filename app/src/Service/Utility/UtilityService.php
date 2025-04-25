@@ -12,7 +12,9 @@ class UtilityService
     {
         $secret = file_get_contents("/run/secrets/$filename");
 
-        if ($secret === false) {
+        if (file_exists("/run/secrets/$filename")) {
+            $secret = file_get_contents("/run/secrets/$filename");
+        } else {
             // For Podman compatability, check if the secret is available as an environment variable.
             $secret = getenv(strtoupper($filename));
         }
