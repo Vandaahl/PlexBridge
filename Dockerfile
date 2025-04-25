@@ -13,6 +13,8 @@ RUN whoami > /tmp/debug.log && cat /tmp/debug.log
 # Switch to root to adjust permissions for php user
 USER root
 
+RUN mkdir -p /app/var/database
+
 # Change ownership to php user and php group
 RUN chown -R php:php /app
 RUN chmod -R 755 /app
