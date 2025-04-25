@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Generate APP_SECRET if not provided
+if [ -z "$APP_SECRET" ]; then
+    export APP_SECRET=$(openssl rand -hex 32)
+    echo "Generated new APP_SECRET"
+fi
+
 # Create database directory if it doesn't exist
 mkdir -p /app/var/database
 
