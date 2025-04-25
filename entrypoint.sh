@@ -8,6 +8,8 @@ fi
 
 # Create database directory if it doesn't exist
 mkdir -p /app/var/database
+chown nginx:nginx /app/var/database
+chmod 755 /app/var/database
 
 # Run database migrations
 php /app/bin/console doctrine:migrations:migrate --no-interaction
