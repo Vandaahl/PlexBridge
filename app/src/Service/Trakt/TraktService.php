@@ -76,6 +76,47 @@ class TraktService
     }
 
     /**
+     * Refresh the access token (which expires in 24 hours) using the refresh token.
+     *
+     * @return bool True if the token was successfully refreshed.
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    private function refreshAccessToken(): bool
+    {
+        $this->httpClient->enableLogging(true);
+
+        $tokenData = $this->getAccessTokenFromStorage();
+
+        if (empty($tokenData['refresh_token'])) {
+            return false;
+        }
+
+        $response = $this->httpClient->send(
+            self::TRAKT_TOKEN_URL,
+            'POST',
+            [
+                'refresh_token' => $tokenData['refresh_token'],
+                'client_id' => $this->utilityService->getDockerSecret('trakt_client_id'),
+                'client_secret' => $this->utilityService->getDockerSecret('trakt_client_secret'),
+                'redirect_uri' => getenv('TRAKT_REDIRECT_URL'),
+                'grant_type' => 'refresh_token'
+            ],
+            ['content-type:application/json;charset=utf-8']
+        );
+
+        if (isset($response['access_token'])) {
+            $this->saveAccessTokenData($response);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Save access-token to the database.
      *
      * @param array $tokenData
@@ -99,6 +140,11 @@ class TraktService
      * Check if the locally stored access token is still valid.
      *
      * @return bool
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function isAccessTokenValid(): bool
     {
@@ -117,7 +163,17 @@ class TraktService
         }
         $currentDate = new \DateTime('now');
 
-        return $currentDate < $expiresAtDate;
+        $valid = $currentDate < $expiresAtDate;
+
+        if (!$valid) {
+            try {
+                $valid = $this->refreshAccessToken();
+            } catch (\Exception $e) {
+                return false;
+            }
+        }
+
+        return $valid;
     }
 
     /**

@@ -27,6 +27,12 @@ class TraktController extends AbstractController
     }
 
     /**
+     * This route is called by Trakt after the user has authorized the app.
+     * The user will be redirected to the /redirect route, which gets an access token.
+     * It will then call the /redirect/token route, which stores the token,
+     * then redirect the user to the /home route, which will then show the user the
+     * "You have been logged in" message.
+     *
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
