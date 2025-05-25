@@ -49,7 +49,7 @@ class HttpClient
             $trimmedHeaders = str_replace(' ', '', array_map('strtolower', array_map('trim', $headers)));
             // If the json content type header is set, encode the post data to json.
             if (count($headers) && in_array('application/x-www-form-urlencoded', $trimmedHeaders)) {
-                $requestData['body'] = $data;
+                $requestData['body'] = http_build_query($data);
             } else {
                 $requestData['json'] = $data;
             }

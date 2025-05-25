@@ -67,13 +67,33 @@ class LetterboxdService
 
         $url = $this::LETTERBOXD_ACTIVITY_URL . "{$filmId}";
 
-        $result = $this->submitActivity('watched', $url, $event);
+        $postData = [
+            'viewingableUid' => "film:$filmId",
+            'viewingableUID' => "film:$filmId",
+            'specifiedDate' => "true",
+            'viewingDateStr' => date('Y-m-d'),
+            'rating' => 0,
+        ];
 
         if ($rating) {
-            $result = $this->submitRating($filmId, $rating, $event);
+            $postData['rating'] = $rating;
         }
 
-        return $result;
+        // Marking a movie as watched (which is different from logged) will return a Letterboxd error if the movie was watched and logged before.
+        $result = $this->submitActivity('watched', $url, $event, ['watched' => true]);
+
+        // The movie was watched before, so we mark it as a rewatch for the new log entry. If there is a rating, we don't want a rewatch, because
+        // we assume the rewatch was scrobbled and the rating was added manually.
+        if (!$rating && $result['result'] === false && $result['errorCodes'][0] === 'film.not.watched.but.viewing.exists') {
+            $postData['rewatch'] = "true";
+        }
+
+        return $this->submitActivity(
+            'diary',
+            '',
+            $event,
+            $postData
+        );
     }
 
     /**
@@ -95,7 +115,7 @@ class LetterboxdService
             $event,
             [
                 'filmId' => $letterboxdId,
-                'specifiedDate' => true,
+                'specifiedDate' => "true",
                 'viewingDateStr' => date('Y-m-d'), // e.g. 2014-08-11
                 'rating' => $rating,
             ]
@@ -131,8 +151,12 @@ class LetterboxdService
             'POST',
             $postData,
             [
-                'Cookie:letterboxd.user="' . $this->utilityService->getDockerSecret('letterboxd_cookie_user_value') . '"; com.xk72.webparts.csrf=' . $this->utilityService->getDockerSecret('letterboxd_cookie_csrf_value') . ';',
-                'Content-Type' => 'application/x-www-form-urlencoded'
+                'Cookie' => sprintf(
+                    'letterboxd.user=%s; com.xk72.webparts.csrf=%s',
+                    rawurlencode($this->utilityService->getDockerSecret("letterboxd_cookie_user_value")),
+                    rawurlencode($this->utilityService->getDockerSecret("letterboxd_cookie_csrf_value"))
+                ),
+                'Content-Type' =>  'application/x-www-form-urlencoded'
             ]
         );
 
