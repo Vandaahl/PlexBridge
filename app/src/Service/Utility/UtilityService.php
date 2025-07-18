@@ -10,8 +10,6 @@ class UtilityService
      */
     public function getDockerSecret(string $filename): false|string
     {
-        $secret = file_get_contents("/run/secrets/$filename");
-
         if (file_exists("/run/secrets/$filename")) {
             $secret = file_get_contents("/run/secrets/$filename");
         } else {
