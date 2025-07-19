@@ -56,8 +56,10 @@ class LetterboxdService
 
         $filmId = $this->getMovieIdFromMarkup($searchPage);
 
+        // If the film ID could not be found, letterboxd.com markup has probably changed. Log it and abort.
         if ($filmId === null) {
-            throw new \Exception("Movie with ID $imdbId not found");
+            $this->updateEventStatus($event, null, " movie ID not found");
+            return [];
         }
 
         if (!$movie->getLetterboxdId()) {
@@ -175,14 +177,14 @@ class LetterboxdService
      */
     private function getMovieIdFromMarkup(string $markup): ?string
     {
-        if (preg_match('/id="backdrop".*data-film-id="(.*)"/iU', $markup, $matches)) {
+        if (preg_match('/film-poster.*".*data-film-id="(.*)"/iU', $markup, $matches)) {
             return $matches[1];
         }
 
         return null;
     }
 
-    private function updateEventStatus(string|Event $event, array $letterboxdData): void
+    private function updateEventStatus(string|Event $event, ?array $letterboxdData, ?string $customMessage = null): void
     {
         if (!is_object($event)) {
             $event = $this->entityManager->getRepository(Event::class)->find($event);
@@ -192,12 +194,12 @@ class LetterboxdService
             return;
         }
 
-        $message = "logged";
+        $message = ($letterboxdData) ? "logged" : $customMessage;
 
-        if (isset($letterboxdData['result']) && $letterboxdData['result'] !== true) {
+        if ($letterboxdData && isset($letterboxdData['result']) && $letterboxdData['result'] !== true) {
             $message = "failed";
-        } elseif (isset($letterboxdData['rating'])) {
-            $message = " logged and rated";
+        } elseif ($letterboxdData && isset($letterboxdData['rating'])) {
+            $message = "logged and rated";
         }
 
         $event->setStatusLetterboxd($message);
