@@ -36,7 +36,7 @@
                         {% if 'letterboxd' in activatedServices %}
                             <td>
                                 {{ event.statusLetterboxd }}
-                                {% if event.statusLetterboxd == 'failed' and media.letterboxdId is defined %}
+                                {% if (event.statusLetterboxd == 'failed' or event.statusLetterboxd == 'movie ID not found') and media.letterboxdId is defined %}
                                 <form action="{{ path('letterboxd_retry') }}" id="letterboxd-retry-{{ loop.index }}-form" class="inline retry-form" method="post">
                                     <input type="hidden" name="token" value="{{ csrf_token('retry-letterboxd') }}">
                                     <input type="hidden" name="rating" value="{{ event.rating }}">
@@ -69,4 +69,21 @@
             {% endif %}
         </tbody>
     </table>
+
+    {% if events is defined %}
+        <div class="pagination">
+            <div class="pagination__header">Page {{ events.currentPage }} of {{ events.nbPages }}</div>
+            {% if events.haveToPaginate %}
+                <div class="pagination__navigation">
+                    {% if events.hasPreviousPage %}
+                        <a href="{{ path('home', {page: events.getPreviousPage}) }}">&lt; Previous</a>
+                    {% endif %}
+
+                    {% if events.hasNextPage %}
+                        <a href="{{ path('home', {page: events.getNextPage}) }}">Next &gt;</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
 </div>

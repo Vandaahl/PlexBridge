@@ -8,6 +8,8 @@ use App\Service\Trakt\TraktService;
 use App\Service\Utility\SettingsService;
 use App\Service\Utility\UtilityService;
 use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -53,15 +55,17 @@ class HomeController extends AbstractController
             10
         );*/
 
-        $events = $this->entityManager->createQueryBuilder()
+        $eventsQuery = $this->entityManager->createQueryBuilder()
             ->select('e', 'ep', 'm')
             ->from(Event::class, 'e')
             ->leftJoin('e.episode', 'ep')
             ->leftJoin('e.movie', 'm')
             ->orderBy('e.id', 'DESC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult();
+            ->getQuery();
+
+        $events = new Pagerfanta(new QueryAdapter($eventsQuery));
+        $events->setMaxPerPage(10);
+        $events->setCurrentPage($request->query->get('page', 1));
 
         return $this->render('base.html.twig', [
             'message' => '',

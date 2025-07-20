@@ -180,3 +180,23 @@ body {
 .nowrap {
     white-space: nowrap;
 }
+
+.pagination {
+    margin: var(--size-3);
+}
+
+.pagination__header {
+    font-size: var(--font-size-0);
+}
+
+.pagination__navigation {
+    margin: var(--size-2);
+}
+
+.pagination__navigation a:first-child {
+    margin-right: var(--size-1);
+}
+
+.pagination__navigation a:nth-child(2) {
+    margin-left: var(--size-1);
+}
