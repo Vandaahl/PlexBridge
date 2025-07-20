@@ -58,7 +58,7 @@ class LetterboxdService
 
         // If the film ID could not be found, letterboxd.com markup has probably changed. Log it and abort.
         if ($filmId === null) {
-            $this->updateEventStatus($event, null, " movie ID not found");
+            $this->updateEventStatus($event, null, "movie ID not found");
             return [];
         }
 
