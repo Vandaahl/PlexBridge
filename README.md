@@ -22,6 +22,8 @@ services:
       # Port in URL must match port assigned to nginx
       - TRAKT_REDIRECT_URL=http://localhost:8000/redirect
       - TZ=Europe/Amsterdam
+      # This is optional, use a comma-separated list of Plex usernames to limit tracking activity to one or more users of your Plex installation
+      - PLEX_USER_WHITELIST=
     ports:
       - "8000:8080"
     secrets:

@@ -63,6 +63,11 @@ class SyncService
 
         $this->incomingLogger->info($postData);
 
+        if ($this->isPlexUserWhitelisted($plexData->user) === false) {
+            $this->incomingLogger->warning("Plex user {$plexData->user} is not whitelisted. Skipping.");
+            return;
+        }
+
         $event = new Event();
         $event->setDate(new \DateTimeImmutable($plexData->date));
         $event->setRating($plexData->rating);
@@ -175,5 +180,25 @@ class SyncService
     {
         $repository = $this->entityManager->getRepository($className);
         return $repository->findOneBy(['plexGuid' => $plexGuid]);
+    }
+
+    private function isPlexUserWhitelisted(string $plexUsername): bool
+    {
+        $whitelist = getenv('PLEX_USER_WHITELIST');
+        if (!$whitelist) {
+            return true;
+        }
+
+        if (str_contains($whitelist, ',')) {
+            $whitelist = explode(',', $whitelist);
+        } else {
+            $whitelist = [$whitelist];
+        }
+
+        if (!in_array($plexUsername, $whitelist)) {
+            return false;
+        }
+
+        return true;
     }
 }
