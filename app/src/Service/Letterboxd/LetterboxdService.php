@@ -177,7 +177,7 @@ class LetterboxdService
      */
     private function getMovieIdFromMarkup(string $markup): ?string
     {
-        if (preg_match('/film-poster.*".*data-film-id="(.*)"/iU', $markup, $matches)) {
+        if (preg_match('/LazyPoster.*".*data-film-id="(.*)"/iU', $markup, $matches)) {
             return $matches[1];
         }
 
