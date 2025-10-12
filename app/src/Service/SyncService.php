@@ -59,6 +59,12 @@ class SyncService
             return;
         }
 
+        // When a user adjusts their Plex rating, that will trigger a webhook that sends the difference between the
+        // new and old rating (identified by the absence of 'userRating' value) to PlexBridge, which is no good
+        if ($data['event'] === 'media.rate' && !isset($data['Metadata']['userRating'])) {
+            return;
+        }
+
         $plexData = PlexEventDTO::fromArray($data);
 
         $this->incomingLogger->info($postData);
