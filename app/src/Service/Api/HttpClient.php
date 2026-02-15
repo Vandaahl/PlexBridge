@@ -44,6 +44,26 @@ class HttpClient
     {
         $requestData = [];
 
+        // Add a default Chrome User-Agent if not provided
+        $uaSet = false;
+        foreach ($headers as $key => $value) {
+            if (strtolower((string)$key) === 'user-agent') {
+                $uaSet = true;
+                break;
+            }
+        }
+        if (!$uaSet) {
+            $headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36';
+        }
+
+        // Add standard browser headers if not present
+        if (!isset($headers['Accept'])) {
+            $headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7';
+        }
+        if (!isset($headers['Accept-Language'])) {
+            $headers['Accept-Language'] = 'en-US,en;q=0.9';
+        }
+
         if ($data) {
             // Remove capitals and spaces from the $headers array values, so we can search in it.
             $trimmedHeaders = str_replace(' ', '', array_map('strtolower', array_map('trim', $headers)));
