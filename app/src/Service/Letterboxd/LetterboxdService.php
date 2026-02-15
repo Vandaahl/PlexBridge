@@ -181,6 +181,10 @@ class LetterboxdService
             return $matches[1];
         }
 
+        if (preg_match('/data-film-id="(.*)"/iU', $markup, $matches)) {
+            return $matches[1];
+        }
+
         return null;
     }
 
