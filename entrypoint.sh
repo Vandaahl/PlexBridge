@@ -16,6 +16,15 @@ if [ -z "${APP_SECRET:-}" ]; then
   fi
 fi
 
+# Set environment variables for curl-impersonate
+if [ -f "/usr/lib/libcurl-impersonate.so" ]; then
+    export LD_PRELOAD=/usr/lib/libcurl-impersonate.so
+    export CURL_IMPERSONATE=chrome120
+    echo "curl-impersonate library found and preloaded."
+else
+    echo "Warning: curl-impersonate library NOT found. Proceeding with standard curl."
+fi
+
 # Run database migrations
 php /app/bin/console doctrine:migrations:migrate --no-interaction
 

@@ -79,3 +79,4 @@ create two files: **letterboxd_cookie_csrf_value.txt** and **letterboxd_cookie_u
 - Open Props CSS library
 - Official Trakt API
 - Letterboxd integration based on cookies
+- [lexiforest/curl-impersonate](https://github.com/lexiforest/curl-impersonate) to simulate a Chrome 120 browser to bypass Letterboxd's anti-bot protection
