@@ -14,14 +14,14 @@ RUN apk add --no-cache patchelf
 
 # Download and patch libcurl-impersonate based on architecture
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
-        VERSION="v1.2.1"; \
+        VERSION="v1.5.6"; \
         FILENAME="libcurl-impersonate-${VERSION}.x86_64-linux-gnu.tar.gz"; \
         URL="https://github.com/lexiforest/curl-impersonate/releases/download/${VERSION}/${FILENAME}"; \
         curl -L "$URL" | tar -xz -C /usr/lib libcurl-impersonate.so.4.8.0; \
         mv /usr/lib/libcurl-impersonate.so.4.8.0 /usr/lib/libcurl-impersonate.so; \
         patchelf --set-soname libcurl.so.4 /usr/lib/libcurl-impersonate.so; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
-        VERSION="v1.2.1"; \
+        VERSION="v1.5.6"; \
         FILENAME="libcurl-impersonate-${VERSION}.aarch64-linux-gnu.tar.gz"; \
         URL="https://github.com/lexiforest/curl-impersonate/releases/download/${VERSION}/${FILENAME}"; \
         curl -L "$URL" | tar -xz -C /usr/lib libcurl-impersonate.so.4.8.0; \
@@ -86,6 +86,10 @@ USER root
 
 # Set the script as executable
 RUN chmod +x /entrypoint.sh
+
+# Set environment variables for curl-impersonate
+ENV LD_PRELOAD=/usr/lib/libcurl-impersonate.so
+ENV CURL_IMPERSONATE=chrome136
 
 # Create the necessary directory and set proper permissions
 RUN mkdir -p /run/nginx && chown -R nginx:nginx /run/nginx
