@@ -151,7 +151,7 @@ class SyncService
                     if ($plexData->rating === null) {
                         return;
                     }
-                    $this->letterboxdService->publishActivity($movie, $guid, $event, $plexData->rating);
+                    $this->letterboxdService->publishActivity($movie, $guid, $event, $plexData->rating / 2);
                 },
                 default => ''
             };

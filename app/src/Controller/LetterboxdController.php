@@ -19,7 +19,7 @@ class LetterboxdController extends AbstractController
             throw new \Exception('Invalid CSRF token');
         }
 
-        $rating = $request->request->get('rating');
+        $rating = $request->request->get('rating') / 2;
         $filmId = $request->request->get('lid');
         $eventId = $request->request->get('eventId');
 
