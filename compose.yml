@@ -1,5 +1,6 @@
 services:
   plexbridge-app:
+    container_name: plexbridge
     image: ghcr.io/vandaahl/plexbridge:latest
     restart: unless-stopped
     volumes:

@@ -41,6 +41,7 @@
                                     <input type="hidden" name="token" value="{{ csrf_token('retry-letterboxd') }}">
                                     <input type="hidden" name="rating" value="{{ event.rating }}">
                                     <input type="hidden" name="id" value="{{ media.letterboxdId }}">
+                                    <input type="hidden" name="lid" value="{{ media.lid }}">
                                     <input type="hidden" name="eventId" value="{{ event.id }}">
                                     <a href="#" onclick="document.getElementById('letterboxd-retry-{{ loop.index }}-form').submit()">
                                         <svg

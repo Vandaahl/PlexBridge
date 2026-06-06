@@ -33,7 +33,7 @@ final class PlexEventDTO
     {
         return new self(
             $data['event'],
-            $data['rating'] ?? null,
+            $data['rating'] / 2 ?? null,
             $data['Metadata']['type'],
             $data['Metadata']['guid'],
             $data['Metadata']['title'],

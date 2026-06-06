@@ -20,7 +20,7 @@ class LetterboxdController extends AbstractController
         }
 
         $rating = $request->request->get('rating');
-        $filmId = $request->request->get('id');
+        $filmId = $request->request->get('lid');
         $eventId = $request->request->get('eventId');
 
         if ($filmId && $rating) {

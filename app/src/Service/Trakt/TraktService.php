@@ -15,7 +15,7 @@ class TraktService
 {
     public const TRAKT_ADD_RATINGS_URL = "https://api.trakt.tv/sync/ratings";
     public const TRAKT_SCROBBLE_URL = "https://api.trakt.tv/scrobble/stop";
-    public const TRAKT_AUTHORIZATON_URL = "https://api.trakt.tv/oauth/authorize";
+    public const TRAKT_AUTHORIZATION_URL = "https://api.trakt.tv/oauth/authorize";
     public const TRAKT_TOKEN_URL = "https://api.trakt.tv/oauth/token";
     public const TRAKT_STATE = "trakt-sync";
 
@@ -45,17 +45,12 @@ class TraktService
             ]
         );
 
-        return $this::TRAKT_AUTHORIZATON_URL . "?$query";
+        return $this::TRAKT_AUTHORIZATION_URL . "?$query";
     }
 
     /**
      * @param string $code
      * @return array
-     * @throws TransportExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
      */
     public function getAccessToken(string $code): array
     {
@@ -182,6 +177,7 @@ class TraktService
      * @param string $ratedAt
      * @param string $type
      * @return string|bool Returns a string stating how many movies or episodes were rated, or false on error.
+     *
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
@@ -244,6 +240,7 @@ class TraktService
      * @param string $guid IMDb ID
      * @param string $type movie or episode
      * @return bool True on success
+     *
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface

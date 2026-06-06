@@ -3,10 +3,8 @@
 namespace App\Service\Api;
 
 use Psr\Log\LoggerInterface;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -33,36 +31,12 @@ class HttpClient
      * @param string $method The HTTP method to use (one of GET, POST, PUT, DELETE).
      * @param array|null $data Assoc array with data to send with this request. Will be sent as JSON.
      * @param array $headers ['Content-Type' => 'text/plain'] Custom headers. Content-Type: application/json will be added automatically if you don't set a type manually.
-     * @return array|string $return Contents received.
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
+     * @return array|string Contents received.
+     * @throws \Exception
      */
     public function send(string $endpoint, string $method = 'POST', ?array $data = null, array $headers = []): array|string
     {
         $requestData = [];
-
-        // Add a default Chrome User-Agent if not provided
-        $uaSet = false;
-        foreach ($headers as $key => $value) {
-            if (strtolower((string)$key) === 'user-agent') {
-                $uaSet = true;
-                break;
-            }
-        }
-        if (!$uaSet) {
-            $headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36';
-        }
-
-        // Add standard browser headers if not present
-        if (!isset($headers['Accept'])) {
-            $headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7';
-        }
-        if (!isset($headers['Accept-Language'])) {
-            $headers['Accept-Language'] = 'en-US,en;q=0.9';
-        }
 
         if ($data) {
             // Remove capitals and spaces from the $headers array values, so we can search in it.
@@ -79,18 +53,23 @@ class HttpClient
             $requestData['headers'] = $headers;
         }
 
-        $response = $this->client->request(
-            $method,
-            $endpoint,
-            $requestData
-        );
+        try {
+            $response = $this->client->request(
+                $method,
+                $endpoint,
+                $requestData
+            );
 
-        $content = $response->getContent();
+            $content = $response->getContent(false);
+            $statusCode = $response->getStatusCode();
 
-        $this->url = $response->getInfo('url');
-        $this->responseHeaders = $response->getHeaders();
+            $this->url = $response->getInfo('url');
+            $this->responseHeaders = $response->getHeaders(false);
+        } catch (TransportExceptionInterface $e) {
+            throw new \Exception('Unable to connect to the API. Error: '.$e->getMessage());
+        }
 
-        $this->logRequests($endpoint, $headers, json_encode($data), $response->getStatusCode(), $content);
+        $this->logRequests($endpoint, $headers, json_encode($data), $statusCode, $content);
 
         if ($this->returnRawContent) {
             return $content;
@@ -98,7 +77,7 @@ class HttpClient
 
         try {
             return $response->toArray();
-        } catch (\Exception $e) {
+        } catch (HttpExceptionInterface|ExceptionInterface $e) {
             throw new \Exception('Return value is not an array. Try setting enableReturnOfRawContent() to true if you expect a string.');
         }
     }

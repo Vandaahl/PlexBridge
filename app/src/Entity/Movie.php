@@ -39,6 +39,9 @@ class Movie
     #[ORM\Column(nullable: true)]
     private ?int $letterboxdId = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $lid = null;
+
     public function __construct()
     {
         $this->event = new ArrayCollection();
@@ -147,6 +150,18 @@ class Movie
     public function setLetterboxdId(?int $letterboxdId): static
     {
         $this->letterboxdId = $letterboxdId;
+
+        return $this;
+    }
+
+    public function getLid(): ?string
+    {
+        return $this->lid;
+    }
+
+    public function setLid(?string $lid): static
+    {
+        $this->lid = $lid;
 
         return $this;
     }

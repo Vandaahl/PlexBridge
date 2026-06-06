@@ -16,10 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class HomeController extends AbstractController
 {
@@ -38,7 +36,7 @@ class HomeController extends AbstractController
         }
 
         $activatedServices = $settingService->getSettings('services');
-        $isTraktLoggedIn = $isTraktPrepared = $isLetterboxdPrepared = $traktLog = $letterboxdLog = null;
+        $isTraktLoggedIn = $isTraktPrepared = $isLetterboxdPrepared = null;
         if (count($activatedServices)) {
             if (in_array('trakt', $activatedServices)) {
                 $isTraktLoggedIn = $traktService->isAccessTokenValid();
@@ -80,11 +78,9 @@ class HomeController extends AbstractController
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
+     * @throws ServerExceptionInterface
      */
     #[Route('/sync', name: 'sync')]
     public function sync(Request $request, SyncService $syncService): Response
