@@ -72,8 +72,8 @@ create two files: **letterboxd_cookie_csrf_value.txt** and **letterboxd_cookie_u
 
 ## Software used
 
-- PHP 8.2
-- Symfony 7.2
+- PHP 8.5
+- Symfony 7.4
 - Nginx
 - SQLite database
 - Open Props CSS library
